@@ -12,6 +12,14 @@ public class Cenario extends JFrame implements KeyListener{
 	JButton snake = new JButton();
 	JPanel painel = new JPanel();
 	JButton start = new JButton("START");
+	JButton points = new JButton("0");
+	//JLabel texto = new JLabel("Pontuacao");
+	//Random
+	
+	JButton Aleatorio = new JButton();
+	
+	// Cria uma instância de Random
+	Random random=new Random();
 	
 	private Timer timer;
 	private int estado = 0;
@@ -22,27 +30,26 @@ public class Cenario extends JFrame implements KeyListener{
 	//int y = bounds.y;
 	//int x; int y;
 	
-	// Cria uma instância de Random
-        Random random;
-	
 	//Pega a posição do rectangulo/campo(onde a snake anda)
-	
 	Rectangle campo = painel.getBounds();
 	int campox=0;
 	int campoy=0;
 	int campoWidth=0;
 	int campoHeight=0;
 	
-	
 	//Limites da snake
-		
 	Rectangle cobra = snake.getBounds();	
 	int cobraX=0;
 	int cobraY=0;
 	int cobraHeight=0;
 	int cobraWidth=0;
-	//Random
-	JButton Aleatorio = new JButton();
+	
+	//Cordenadas Food
+	int foodX=0;
+	int foodY=0;
+	
+	//Pontos iniciais
+	int pontos = 0;
 	
 	public Cenario()//Inicializar configurancoes da tela
 	{
@@ -66,28 +73,25 @@ public class Cenario extends JFrame implements KeyListener{
 		Painel();
 		Snake();
 		
-		//Random
 		
-        Aleatorio.setBackground(new Color(242,174,48)); // Cor do objeto
-        Aleatorio.setBounds(10, 0, 20, 20); // Tamanho inicial
-        //painel.add(Aleatorio);
-        
-       random = new Random();
-        
+		
         // Chama o método para posicionar o objeto aleatoriamente
         posicionarObjetoAleatorio();
-		
+		//Random
+		initRandom();
+		botaoPontuacao();
 		ShowIt();
 		
 		//Inicia o jogo
 		botaoStart();
 		
 		// Configura o timer com intervalo de 200 ms para controlar a velocidade
-        timer = new Timer(30, new ActionListener() {
+        timer = new Timer(20, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 move(estado);
 				//System.out.println(" X= "+campox+"   Y= "+campoy+" H= "+campoHeight+"  W = "+campoWidth);
+				eatFood();
 				colisao();
 				
 				//Actualizacao da posicao da snake
@@ -99,20 +103,53 @@ public class Cenario extends JFrame implements KeyListener{
         });	
 		//timer.start(); // Inicia o timer para mover a Snake continuamente
 	}
-	 
+	public void botaoPontuacao()//Botao start
+	{
+		//start.setPreferredSize(new Dimension(80, 50));  // Tamanho do botão
+		points.setLayout(null);
+        points.setBackground(new Color(23,174,191)); 
+		points.setBounds(699, 6, 80, 50);   // Define a posição e o tamanho do botão "start"
+		this.add(points);
+	}
+	public void eatFood()
+	{
+		// Atualiza as coordenadas e dimensões da cobra e da comida
+		cobraX = snake.getX();
+		cobraY = snake.getY();
+		cobraWidth = snake.getWidth();
+		cobraHeight = snake.getHeight();
+
+		Rectangle snakeBounds = new Rectangle(cobraX, cobraY, cobraWidth, cobraHeight);
+		Rectangle foodBounds = new Rectangle(foodX, foodY, Aleatorio.getWidth(), Aleatorio.getHeight());
+
+		// Verifica se as coordenadas da Snake se sobrepõem ao alimento
+		if (snakeBounds.intersects(foodBounds)) {
+			setPoints();
+			System.out.println("A Snake comeu a comida!");
+			initRandom(); // Reposiciona a comida aleatoriamente
+		}
+	}
+	public void setPoints()
+	{
+		pontos++;
+		points.setText(Integer.toString(pontos));
+	}
+	public void initRandom()//Isto é para lidar com tudo sobre random
+	{
+		// Gera posições aleatórias dentro do painel	
+		foodX = random.nextInt(/*campoWidth*/450-4 +1)+4;  // Subtrai 50 para garantir que o objeto fique dentro do painel
+        foodY = random.nextInt(/*campoHeight*/350-4+1)+4;   // Subtrai 50 para garantir que o objeto fique dentro do painel  
+         // Define a nova posição do objeto
+        Aleatorio.setLocation(foodX, foodY);
+	}
 	private void posicionarObjetoAleatorio() {
+		Aleatorio.setBackground(new Color(242,174,48)); // Cor do objeto
+		Aleatorio.setLayout(null);
+        Aleatorio.setBounds(10, 0, 20, 20); // Tamanho inicial
+        //painel.add(Aleatorio);
 		painel.add(Aleatorio);
-        // Gera posições aleatórias dentro do painel
-        int x = random.nextInt(/*campoWidth*/600 - 50);  // Subtrai 50 para garantir que o objeto fique dentro do painel
-        int y = random.nextInt(/*campoHeight*/400 - 50);   // Subtrai 50 para garantir que o objeto fique dentro do painel   
-        // Define a nova posição do objeto
-        Aleatorio.setLocation(x, y);
     }
-		
-	
 	public void configurarBotaoSnake() {
-		
-		
         // Configurações adicionais para o botão
         //snake.setPreferredSize(new Dimension(20, 20));  // Tamanho do botão
 		snake.setLayout(null);
@@ -244,13 +281,13 @@ public class Cenario extends JFrame implements KeyListener{
 			timer.stop();
 			return;
 		}
-		if ((cobraX + cobraWidth) >= /*(campox + campoWidth)*/ 447) {
+		if ((cobraX + cobraWidth) >= /*(campox + campoWidth)*/ 500/*447*/) {
 			System.out.println("Colisão com a borda direita!");
 			JOptionPane.showMessageDialog(this, "Game Over!","Tela de Game over",JOptionPane.ERROR_MESSAGE);
 			timer.stop();
 			return;
 		}
-		 if ((cobraY + cobraHeight) >= 350) {
+		 if ((cobraY + cobraHeight) >= 400 /*345*/) {
 			System.out.println("Colisão com a borda inferior!");
 			JOptionPane.showMessageDialog(this, "Game Over!","Tela de Game over",JOptionPane.ERROR_MESSAGE);
 			timer.stop();
